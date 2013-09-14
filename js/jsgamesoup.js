@@ -276,7 +276,7 @@ function JSGameSoup(canvas, framerate) {
 		}
 		return JSGS.pageOffset;
 	};
-	
+
 	// get the position of the triggered event
 	this.getSetPointerPosition = function(ev) {
 		var mouseX, 
@@ -374,6 +374,9 @@ function JSGameSoup(canvas, framerate) {
 	
 	// key down event
 	this.onkeydown = function onkeydown(ev) {
+		if (!enableKeyEvents) {
+			return true;
+		}
 		var ev = (ev) ? ev : window.event;
 		// call keyDown on entities who are listening
 		if (!JSGS.heldKeys[ev.keyCode]) {
@@ -388,6 +391,9 @@ function JSGameSoup(canvas, framerate) {
 	
 	// key up event
 	this.onkeyup = function onkeyup(ev) {
+		if (!enableKeyEvents) {
+			return true;
+		}
 		var ev = (ev) ? ev : window.event;
 		// call keyUp on entities who are listening
 		if (JSGS.heldKeys[ev.keyCode]) {
@@ -595,28 +601,42 @@ function JSGameSoup(canvas, framerate) {
 		this.frameCount += 1;
 	}
 	
+	var looping = null;
+	var enableKeyEvents = true;
+
 	/** Launch an instance of jsGameSoup (generally happens automatically). */
 	this.launch = function launch() {
+		enableKeyEvents = true;
 		var GS = this;
 		function rethrow(e) { throw e; }
 		// launch our custom loop
 		if (navigator.userAgent.indexOf("MSIE") == -1) {
-			var looping = setInterval(function() {
+			looping = setInterval(function() {
 				try {
 					GS.gameSoupLoop();
 				} catch(e) {
 					clearInterval(looping);
+					looping = null;
 					rethrow(e);
 				}
 			}, 1000 / this.framerate);
 		} else {
 			// internet explorer is too hard to debug with try/catch as it forgets the stack :(
-			var looping = setInterval(function() { GS.gameSoupLoop(); }, 1000 / this.framerate);
+			looping = setInterval(function() { GS.gameSoupLoop(); }, 1000 / this.framerate);
 		}
 		// DEBUG:
 		//setInterval(function() { for (var e=0; e<entities.length; e++) console.log(entities[e].x + ", " + entities[e].y); }, 1000);
 		//setInterval(function() { console.log(entities.length) }, 1000);
 		//setInterval(function() { console.log(entitiesColliders.length) }, 1000);
+	}
+
+	this.pause = function pause() {
+		if (looping != null) {
+			clearInterval(looping);
+			looping = null;
+			enableKeyEvents = false;
+			this.heldKeys = {};
+		}
 	}
 	
 	/**
