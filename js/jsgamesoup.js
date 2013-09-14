@@ -19,6 +19,8 @@ function JSGameSoup(canvas, framerate) {
 	this.pointerPosition = [0, 0];
 	/** The current/last pointer up/down status */
 	this.pointerDown = false;
+	/** List of the current/last touches */
+	this.touches = null;
 	// where we will output the graphics
 	if (typeof canvas == "string") {
 		// the caller has supplied the ID of a canvas
@@ -289,8 +291,10 @@ function JSGameSoup(canvas, framerate) {
 			touch = ev.touches[0];
 			mouseX = touch.pageX - canvasOffset.left;
 			mouseY = touch.pageY - canvasOffset.top;
+			this.touches = ev.touches;
 		} 
 		else {
+			this.touches = null;
 			// Correct pageX/pageY if necessary.
 			if (ev.pageX === undefined) {
 				ev.pageX = ev.clientX + document.body.scrollLeft
