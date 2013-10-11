@@ -158,10 +158,6 @@ function Sprite(anchor, frames, loadedcallback, scale, errorcallback) {
 		loadcount -= 1;
 		if (loadcount == 0) {
 			sprite.loaded = true;
-			// set the default action
-			if (!action) {
-				sprite.action(a);
-			}
 			// get the first frame width and height
 			var i = frames[action][0][0];
 			sprite.width = parseInt(i.width);
@@ -171,6 +167,12 @@ function Sprite(anchor, frames, loadedcallback, scale, errorcallback) {
 				loadedcallback.call(sprite);
 			}
 		}
+	}
+	
+	// set the default action
+	for (var a in frames) {
+		sprite.action(a);
+		break;
 	}
 	
 	// compute our final loadcount first
